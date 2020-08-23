@@ -20,5 +20,10 @@
   <%= @student.institution.try(:name) %>
 </p>
 
+<p>
+  <strong>Score:</strong>
+  <%= @student.score %>
+</p>
+
 <%= link_to 'Edit', edit_student_path(@student) %> |
 <%= link_to 'Back', students_path %>
