@@ -6,7 +6,7 @@ class StudentsController < ApplicationController
   # GET /students.json
   def index
     # Sqlite3 causing some issue with query not supporting to includes. as of now added joins
-    @search = Student.joins([:institution])#.joins([:institution])
+    @search = Student.joins([:institution])
     @search = get_students_name_like(@search, params[:student_name]) if !params.blank? && !params[:student_name].blank?
     @search = get_institution_name(@search, params[:institution_name]) if !params.blank? && !params[:institution_name].blank?
     @search = name_sort(@search, params[:sort]) if !params.blank? && !params[:sort].blank? && params[:sort] == "full_name"
