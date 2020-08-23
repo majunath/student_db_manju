@@ -1,10 +1,17 @@
 class StudentsController < ApplicationController
   before_action :set_student, only: [:show, :edit, :update, :destroy]
+  helper_method :sort_column, :sort_direction
 
   # GET /students
   # GET /students.json
   def index
-    @students = Student.all
+    # Sqlite3 causing some issue with query not supporting to includes. as of now added joins
+    @search = Student.joins([:institution])#.joins([:institution])
+    @search = get_students_name_like(@search, params[:student_name]) if !params.blank? && !params[:student_name].blank?
+    @search = get_institution_name(@search, params[:institution_name]) if !params.blank? && !params[:institution_name].blank?
+    @search = name_sort(@search, params[:sort]) if !params.blank? && !params[:sort].blank? && params[:sort] == "full_name"
+    @search = name_sort(@search, params[:sort]) if !params.blank? && !params[:sort].blank? && params[:sort] == "name"
+    @students = @search
   end
 
   # GET /students/1
@@ -70,5 +77,26 @@ class StudentsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def student_params
       params.require(:student).permit(:score, :full_name, :address, :phone, :institution_id)
+    end
+
+    def get_students_name_like(students, student_name = "")
+      students.where("students.full_name Like ?", "%" + student_name + "%")
+    end
+
+    def get_institution_name(students, institution_name = "")
+      students.where("institutions.name Like ?", "%" + institution_name + "%")
+    end
+
+    def name_sort(students, sort)
+      students.order(sort + " " + sort_direction)
+    end
+
+    def sort_column
+      return "full_name" if params[:sort] == "full_name"
+      return "name" if params[:sort] == "name"
+    end
+
+    def sort_direction
+      %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     end
 end
